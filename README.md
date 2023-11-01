@@ -6,19 +6,23 @@ auto qs = Qstring();
 
 
 // similar to python's 'FirstabcSecondabcThird'.split('abc')
-qs("FirstabcSecondabcThird").split("abc");
+
+  qs("FirstabcSecondabcThird").split("abc");
 
 
 // similar to python's 'First,Second,Third'.split(',')
-qs("First,Second,Third").split(',');
+
+  qs("First,Second,Third").split(',');
 
 
-//similar to python's 'first second third'.split()
-qs("first second third").split();
+// similar to python's 'first second third'.split()
 
-//similar to python's '   abc   '.strip()
-qs("   abc   ").strip();
+  qs("first second third").split();
+
+// similar to python's '   abc   '.strip()
+
+  qs("   abc   ").strip();
 
 
 // result would be "XYZabcUVW"
-qs("abcXYZabcUVWabc").strip("abc");
+  qs("abcXYZabcUVWabc").strip("abc");
