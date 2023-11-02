@@ -231,6 +231,37 @@ TEST_CASE("Test all Qstring utility tools") {
             CHECK(correctAnswer == qs(testValue).join());
         }
     }
+    SUBCASE("######## Test the gsplit() utility ########") {
+        SUBCASE("split with char * line_to_split and char * delimiter") {
+            const char *test = "abcdabcdabcdFirstabcdabcdabcdabcdSecondabcdabcdabcdThirdabcdabcd";
+            std::vector<std::string_view> correct_answer {
+                                                            std::string_view(""),
+                                                            std::string_view("First"),
+                                                            std::string_view("Second"),
+                                                            std::string_view("Third"),
+                                                            std::string_view("")
+                                                         };
+            auto split_result = qs(test).gsplit("abcd");
+            for (long unsigned int i=0; i<correct_answer.size(); ++i) {
+                CHECK(split_result[i] == correct_answer[i]);
+            }
+        }
+        SUBCASE("split with char * line_to_split and using whitespace delim") {
+            const char *test = " \t  \tFirst Second\t\t  Third ";
+            std::vector<std::string_view> correct_answer {
+                                                            std::string_view("First"),
+                                                            std::string_view("Second"),
+                                                            std::string_view("Third"),
+                                                         };
+            std::cout << "BACK at MAIN" << std::endl;
+            for (auto x : qs(test).gsplit())
+                std::cout << ">" << x << "<" << std::endl;
+            auto split_result = qs(test).gsplit();
+            for (long unsigned int i=0; i<correct_answer.size(); ++i) {
+                CHECK(split_result[i] == correct_answer[i]);
+            }
+        }
+    }
 }
 
 
