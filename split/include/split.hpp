@@ -1,7 +1,5 @@
 #include <cstring>
 #include <string>
-// #include <tuple>
-// #include <exception>
 #include <iostream>
 #include <vector>
 #include <string_view>
@@ -38,6 +36,100 @@ class Qstring {
     std::string_view join_default {""};
     std::string_view joining_word;
     char joined_words[MAX_JOINED_CHARACTERS];
+
+    // This is "greedy"  split where it tries to match as much delimeter as possible
+    // instead of just once. qs(",,,a,,b,,,c,,,").gsplit(",") will return
+    // {"", a", "b", "c", ""}
+    std::vector<std::string_view> &v_gsplit(const std::string_view delim) {
+        int index = 0; // tracks where we are in the line to split
+        split_words.clear();
+        auto pdelim0 = delim.begin();
+        const int delim_length = delim.length();
+        int match = 0;
+        const auto v_word_start = line_to_process.begin();
+        int prev_index = 0;
+        for (auto line_char : line_to_process) {
+            // std::cout << line_char << *(pdelim0+match)<< " ";
+            ++index;
+            if (line_char == *(pdelim0+match)) {
+                ++match;
+                if (match == delim_length) {
+                    // std::cout << "got a match, pushing" << std::basic_string_view(v_word_start+prev_index, index-prev_index-delim_length) << std::endl;
+                    if ( !split_words.size() ) {
+                        split_words.push_back(std::basic_string_view(v_word_start+prev_index, index-prev_index-delim_length));
+                    }
+                    else {
+                        if (delim_length != index-prev_index) {
+                            // std::cout << "before inserting" << std::endl;
+                            // for (auto xw : split_words) {
+                                // std::cout << ">" << xw << "<" << std::endl;
+                            // }
+                            split_words.push_back(std::basic_string_view(v_word_start+prev_index, index-prev_index-delim_length));
+                            // std::cout << "after inserting" << std::endl;
+                            // for (auto xw : split_words) {
+                                // std::cout << ">" << xw << "<" << std::endl;
+                            // }
+                        }
+                    }
+                    prev_index = index;
+                    match = 0;
+                }
+            }
+            else {
+                match = 0;
+            }
+        }
+        // std::cout << "reached the end" << std::endl;
+        // for (auto xw : split_words) {
+        //     std::cout << ">" << xw << "<" << std::endl;
+        // }
+        // std::cout << "indeces" << index << " " << prev_index << " " << delim_length;
+        if (prev_index != index) {
+            split_words.push_back(std::basic_string_view(v_word_start+prev_index, index-prev_index));
+        }
+        else {
+            split_words.push_back(std::basic_string_view(v_word_start+prev_index, 0));
+        }
+        // std::cout << "final" << std::endl;
+        // for (auto xw : split_words) {
+        //     std::cout << ">" << xw << "<" << std::endl;
+        // }
+        return split_words;
+    };
+
+    std::vector<std::string_view> &v_wsplit() {
+        int index = 0; // tracks where we are in the line to split
+        constexpr std::string_view delim {" \t"};
+        split_words.clear();
+        int match = 0;
+        const auto v_word_start = line_to_process.begin()-1;
+        int prev_index = 0;
+        for (auto line_char : line_to_process) {
+            ++index;
+            if (std::any_of(delim.begin(), delim.end(), [line_char](char x) {return x == line_char; })) {
+                ++match;
+                continue;
+            }
+            else {
+                if (match) {
+                    if (match != index-1) {
+                        split_words.push_back(std::basic_string_view(v_word_start+prev_index, index-prev_index-match));
+                    }
+                    prev_index = index;
+                    match = 0;
+                }
+                else {
+                    match = 0;
+                }
+            }
+        }
+        // std::cout << index << " " << prev_index << " " << delim_length;
+        if ((index-prev_index) != match) {
+            split_words.push_back(std::basic_string_view(v_word_start+prev_index, index-prev_index));
+        }
+        return split_words;
+    };
+
 
     std::vector<std::string_view> &v_split(const std::string_view delim) {
         int index = 0; // tracks where we are in the line to split
@@ -178,12 +270,24 @@ class Qstring {
         // ****************************************************************
         // ****************   split ***************************************
         // ****************************************************************
+        std::vector<std::string_view> &gsplit() {
+            return v_wsplit();
+        };
+
         std::vector<std::string_view> &split(const char *delim=" ") {
             return v_split(std::basic_string_view(delim, strlen(delim)));
         };
 
         std::vector<std::string_view> &split(const std::string_view &delim) {
             return v_split(delim);
+        };
+
+        std::vector<std::string_view> &gsplit(const char *delim) {
+            return v_gsplit(std::basic_string_view(delim, strlen(delim)));
+        };
+
+        std::vector<std::string_view> &gsplit(const std::string_view &delim) {
+            return v_gsplit(delim);
         };
 
         // ****************************************************************
