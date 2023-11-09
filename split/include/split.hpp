@@ -291,6 +291,35 @@ class Qstring {
         };
 
         // ****************************************************************
+        // ****************   split chained *******************************
+        // ****************************************************************
+        Qstring &gsplitc() {
+            lines_to_process = v_wsplit();
+            return *this;
+        };
+
+        Qstring &splitc(const char *delim=" ") {
+            lines_to_process = v_split(std::basic_string_view(delim, strlen(delim)));
+            return *this;
+        };
+
+        Qstring &splitc(const std::string_view &delim) {
+            lines_to_process = v_split(delim);
+            return *this;
+        };
+
+        Qstring &gsplitc(const char *delim) {
+            lines_to_process = v_gsplit(std::basic_string_view(delim, strlen(delim)));
+            return *this;
+        };
+
+        Qstring &gsplitc(const std::string_view &delim) {
+            lines_to_process = v_gsplit(delim);
+            return *this;
+        };
+
+
+        // ****************************************************************
         // ****************   strip ***************************************
         // ****************************************************************
 
@@ -311,6 +340,28 @@ class Qstring {
 
 
         // ****************************************************************
+        // ****************   strip chained  ******************************
+        // ****************************************************************
+
+        Qstring &stripc() {
+            for_stripping = strip_default;
+            line_to_process = v_strip();
+            return *this;
+        };
+
+        Qstring &stripc(const char *to_be_stripped_out) {
+            for_stripping = std::string_view(to_be_stripped_out, strlen(to_be_stripped_out));
+            line_to_process = v_strip();
+            return *this;
+        };
+
+        Qstring &stripc(const std::string_view &to_be_stripped_out) {
+            for_stripping = to_be_stripped_out;
+            line_to_process = v_strip();
+            return *this;
+        };
+
+        // ****************************************************************
         // ****************   join  ***************************************
         // ****************************************************************
 
@@ -327,5 +378,27 @@ class Qstring {
         std::string join(const std::string_view &to_be_joined) {
             joining_word = to_be_joined;
             return v_join();
+        };
+
+        // ****************************************************************
+        // ****************   join chained ********************************
+        // ****************************************************************
+
+        Qstring &joinc() {
+            joining_word = join_default;
+            line_to_process = v_join();
+            return *this;
+        };
+
+        Qstring &joinc(const char *to_be_joined) {
+            joining_word = std::string_view(to_be_joined, strlen(to_be_joined));
+            line_to_process = v_join();
+            return *this;
+        };
+
+        Qstring &joinc(const std::string_view &to_be_joined) {
+            joining_word = to_be_joined;
+            line_to_process = v_join();
+            return *this;
         };
 };
