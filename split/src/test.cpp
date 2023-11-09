@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "include/split.hpp"
 
-TEST_CASE("Test all Qstring utility tools") {
+TEST_CASE("Test one-time utility call") {
     auto qs = Qstring();
     SUBCASE("######## Test the split() utility ########") {
         SUBCASE("split with char * line_to_split and char * delimiter") {
@@ -265,6 +265,16 @@ TEST_CASE("Test all Qstring utility tools") {
 }
 
 
+TEST_CASE("Test chaining calls") {
+    auto qs = Qstring();
+    SUBCASE("chaining strip, split, then join") {
+        const char* test_value = "  \t abcFirstabcabcSecondabcThirdabcabc   \t     \n";
+        const std::string correct_answer {"xyFirstxyxySecondxyThirdxyxy"};
+        // note that the last  in the chain should not be the "chained" version
+        auto calculated_value = qs(test_value).stripc().splitc("abc").join("xy");
+        CHECK(correct_answer == calculated_value);
+    }
+}
 
 
 
