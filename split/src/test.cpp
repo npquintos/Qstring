@@ -1,5 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "include/split.hpp"
+#include "include/doctest.h"
 
 TEST_CASE("Test one-time utility call") {
     auto qs = Qstring();
@@ -248,25 +249,30 @@ TEST_CASE("Test one-time utility call") {
         }
         SUBCASE("split with char * line_to_split and using whitespace delim") {
             const char *test = " \t  \tFirst Second\t\t  Third ";
+            std::string test2{" \t  \tFirst Second\t\t  Third "};
+            std::string test3{" \t  \tFirst Second\t\t  Third"};
             std::vector<std::string_view> correct_answer {
                                                             std::string_view("First"),
                                                             std::string_view("Second"),
                                                             std::string_view("Third"),
                                                          };
-            std::cout << "BACK at MAIN" << std::endl;
-            for (auto x : qs(test).gsplit())
-                std::cout << ">" << x << "<" << std::endl;
             auto split_result = qs(test).gsplit();
             for (long unsigned int i=0; i<correct_answer.size(); ++i) {
                 CHECK(split_result[i] == correct_answer[i]);
             }
+            split_result = qs(test2).gsplit();
+            for (long unsigned int i=0; i<correct_answer.size(); ++i) {
+                CHECK(split_result[i] == correct_answer[i]);
+            }
+            split_result = qs(test3).gsplit();
+            for (long unsigned int i=0; i<correct_answer.size(); ++i) {
+                CHECK(split_result[i] == correct_answer[i]);
+            }
+            std::cout << "BACK at MAIN test3" << std::endl;
+            for (auto x : qs(test3).gsplit())
+                std::cout << ">" << x << "<" << std::endl;
         }
     }
-}
-
-
-TEST_CASE("Test chaining calls") {
-    auto qs = Qstring();
     SUBCASE("chaining strip, split, then join") {
         const char* test_value = "  \t abcFirstabcabcSecondabcThirdabcabc   \t     \n";
         const std::string correct_answer {"xyFirstxyxySecondxyThirdxyxy"};
