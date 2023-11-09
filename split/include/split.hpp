@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string_view>
+#include <algorithm>
 #include "include/doctest.h"
 
 #define MAX_JOINED_CHARACTERS 10000
