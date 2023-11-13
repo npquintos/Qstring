@@ -24,10 +24,12 @@
  * }
  *  ...
  */
-#include <ifstream>
+#pragma ounce
 #include <string>
+#include <optional>
 #include <string_view>
-#include "include/Qstring.hpp"
+#include "include/qreader.hpp"
+#include "include/split.hpp"
 
 using ValueGivenField = std::unordered_map<std::string, std::string>
 using FieldsGivenObject = std::unordered_map<std::string_view, std::vector<std::string_view>>
@@ -40,15 +42,15 @@ class OsiDb {
         std::unordered_map<ObjectName,ObjectHeaderCache> cache;
         // fields["analog"] = {"", "recnum", "Indic", "Name", "Key", ...} // analog fields, in order
         FieldsGivenObject fields;
-        std::string line;
-        std::ifstream fin;
+        char line[QLINEMAX];
+        Qreader qr;
         std::string_view current_object{""};
         constexpr std::span<char> to_be_skipped {"\t", "*", "0"};
         Qstring qs;
         void mark_object_start() {
             std::string line;
             std::getline(fin, line) // skip the DB header
-            while(std::getline(fin, line)) {
+            while(qr.read(line)) {
                 if std::any_of(constexpr to_be_skipped.begin(), constexpr to_be_skipped.end(), [line](x) { return line[0] == x; }) {
                     continue;
                 }
@@ -66,17 +68,16 @@ class OsiDb {
                     object_start[object_name] = std::ftell();
                 }
             }
-
         };
 
     public:
-        ValueGivenField result;
+        std::optional<ValueGivenField> result;
         OsiDb(const char* dump_file_name) {
             OsidDb(std::string_view(dump_file_name));
         };
 
         OsiDb(const std::string_view dump_file_name) {
-            fin = std::ifstream(dump_file_name);
+            qr = Qreader(dump_file_name);
             if (!fin) {
                 std::cout << "Error reading dump file: " << dump_file_name << std::endl;
                 exit(1);
@@ -98,11 +99,11 @@ class OsiDb {
             return false;
         };
 
-        auto &next() {
-            result.clear();
-            while (geline(fin, line) && line[0] == "*");
+        std::optional<ValueGivenField> &next() {
+            result.reset();
+            while (getline(fin, line) && line[0] == "*");
             if (!line || line[0] == "0") {
-                return ValueGivenField{};
+                return std::nullopt
             }
             auto line_vector = qs(line).split();
             auto n = line_vector.size();
@@ -113,6 +114,6 @@ class OsiDb {
         };
 
         std::vector<std::string_view> get_fields(const char *object_name) {
-            return fields[object_name];
+            return fields[std::string_view(object_name)];
         }
 }
